@@ -5,6 +5,10 @@ from matplotlib import pyplot as plt
 from data_cleaning import clean_dataset, get_most_correlated, standard_scale_fit, standard_scale_transform, train_test_split
 from knn import predict_knn
 from logistic_regression import train_logistic_regression
+from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score, precision_score, recall_score
+
 
 def main():
     df = pd.read_csv('./dataset_phishing.csv')
@@ -103,7 +107,27 @@ def main():
     plt.legend()
     plt.show()
 
+    log_reg = LogisticRegression()
+    log_reg.fit(X_train, y_train)
+    y_pred_log = log_reg.predict(X_test)
 
+    knn = KNeighborsClassifier(n_neighbors=3)
+    knn.fit(X_train, y_train)
+
+    y_pred_knn = knn.predict(X_test)
+
+    print("Logistic Regression (sklearn):")
+    print(evaluate(y_test, y_pred_log))
+
+    print("\nKNN (sklearn):")
+    print(evaluate(y_test, y_pred_knn))
+
+def evaluate(y_true, y_pred):
+    return {
+        "Accuracy": accuracy_score(y_true, y_pred),
+        "Precision": precision_score(y_true, y_pred),
+        "Recall": recall_score(y_true, y_pred)
+    }
 
 if __name__ == "__main__":
     main()
