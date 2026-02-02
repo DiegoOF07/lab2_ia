@@ -3,6 +3,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 from data_cleaning import clean_dataset, get_most_correlated, standard_scale_fit, standard_scale_transform, train_test_split
+from knn import predict_knn
 from logistic_regression import train_logistic_regression
 
 def main():
@@ -70,6 +71,39 @@ def main():
     plt.title("Regresión Logística - Frontera de decisión")
     plt.grid(True)
     plt.show()
+
+    y_pred_knn = predict_knn(X_train, y_train, X_test, k=3)
+    accuracy = np.mean(y_pred_knn == y_test)
+    print("Accuracy KNN:", accuracy)
+
+    x_min, x_max = X_train[:,0].min()-1, X_train[:,0].max()+1
+    y_min, y_max = X_train[:,1].min()-1, X_train[:,1].max()+1
+
+    xx, yy = np.meshgrid(
+        np.linspace(x_min, x_max, 200),
+        np.linspace(y_min, y_max, 200)
+    )
+
+    grid = np.c_[xx.ravel(), yy.ravel()]
+
+    # clasificar cada punto del grid con KNN
+    Z = predict_knn(X_train, y_train, grid, k=3)
+    Z = Z.reshape(xx.shape)
+
+    # mapa de color de fondo
+    plt.contourf(xx, yy, Z, alpha=0.2)
+
+    # superponer puntos reales
+    plt.scatter(X_train[y_train==0,0], X_train[y_train==0,1], label="Legítimo")
+    plt.scatter(X_train[y_train==1,0], X_train[y_train==1,1], label="Phishing")
+
+    plt.xlabel("Feature 1 (scaled)")
+    plt.ylabel("Feature 2 (scaled)")
+    plt.title("KNN (k=3) Decision Boundary")
+    plt.legend()
+    plt.show()
+
+
 
 if __name__ == "__main__":
     main()
